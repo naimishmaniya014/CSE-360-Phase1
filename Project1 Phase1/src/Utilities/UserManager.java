@@ -2,6 +2,9 @@ package Utilities;
 
 import models.User;
 import models.InvitationCode;
+import models.Role;
+
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class UserManager {
@@ -22,15 +25,49 @@ public class UserManager {
         return instance;
     }
 
-    // Authenticate a user by username and password
+    // Existing methods...
+
+    // Modify the authenticate method
     public User authenticate(String username, String password) {
         User user = users.get(username);
-        if (user != null && !user.isResetRequired() && user.getPassword().equals(password)) {
-            return user;
-        } else if (user != null && user.isResetRequired() && user.getOneTimePassword().equals(password)) {
-            return user;
+        if (user != null) {
+            if (!user.isResetRequired() && user.getPassword().equals(password)) {
+                return user;
+            } else if (user.isResetRequired()) {
+                // Check if OTP is valid and not expired
+                if (user.getOneTimePassword().equals(password)) {
+                    LocalDateTime now = LocalDateTime.now();
+                    if (user.getOtpExpiration() != null && now.isBefore(user.getOtpExpiration())) {
+                        return user;
+                    } else {
+                        // OTP expired
+                        return null;
+                    }
+                }
+            }
         }
         return null;
+    }
+
+    // Modify the resetPassword method to include expiration date
+    public void resetPassword(String username) {
+        User user = users.get(username);
+        if (user != null) {
+            String oneTimePassword = UUID.randomUUID().toString().substring(0, 8);
+            user.setOneTimePassword(oneTimePassword);
+            user.setResetRequired(true);
+            // Set expiration to 24 hours from now
+            user.setOtpExpiration(LocalDateTime.now().plusHours(24));
+            System.out.println("Password reset. One-time password: " + oneTimePassword);
+            System.out.println("OTP expires at: " + user.getOtpExpiration());
+        }
+    }
+
+    // Add a method to invalidate OTP after use
+    public void invalidateOtp(User user) {
+        user.setOneTimePassword(null);
+        user.setResetRequired(false);
+        user.setOtpExpiration(null);
     }
 
     // Add a new user to the system
@@ -69,15 +106,15 @@ public class UserManager {
     }
 
     // Reset a user's password by generating a one-time password
-    public void resetPassword(String username) {
-        User user = users.get(username);
-        if (user != null) {
-            String oneTimePassword = UUID.randomUUID().toString().substring(0, 8);
-            user.setOneTimePassword(oneTimePassword);
-            user.setResetRequired(true);
-            System.out.println("Password reset. One-time password: " + oneTimePassword);
-        }
-    }
+//    public void resetPassword(String username) {
+//        User user = users.get(username);
+//        if (user != null) {
+//            String oneTimePassword = UUID.randomUUID().toString().substring(0, 8);
+//            user.setOneTimePassword(oneTimePassword);
+//            user.setResetRequired(true);
+//            System.out.println("Password reset. One-time password: " + oneTimePassword);
+//        }
+//    }
 
     // Add a role to a user
     public void addRoleToUser(String username, models.Role role) {

@@ -1,5 +1,6 @@
 package models;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class User {
     private List<Role> roles;
     private String oneTimePassword;
     private boolean resetRequired;
+    private LocalDateTime otpExpiration; // New field
 
     public User(String username, String password) {
         this.username = username;
@@ -22,6 +24,17 @@ public class User {
         this.isFirstLogin = true;
         this.roles = new ArrayList<>();
         this.resetRequired = false;
+        this.otpExpiration = null; // Initialize as null
+    }
+
+    // Existing Getters and Setters
+
+    public LocalDateTime getOtpExpiration() {
+        return otpExpiration;
+    }
+
+    public void setOtpExpiration(LocalDateTime otpExpiration) {
+        this.otpExpiration = otpExpiration;
     }
 
     // Getters and Setters

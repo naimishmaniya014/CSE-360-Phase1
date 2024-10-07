@@ -5,7 +5,9 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import models.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.time.format.DateTimeFormatter;
 
 import Utilities.*;
 import javafx.scene.control.*;
@@ -21,6 +23,8 @@ public class LoginPage {
     private Button loginButton;
     private Button useInvitationButton;
     private Label messageLabel;
+    
+    private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("MMMM d, yyyy h:mm a");
 
     public LoginPage() {
         view = new GridPane();
@@ -61,6 +65,70 @@ public class LoginPage {
         return view;
     }
 
+    // Existing methods...
+
+    private void handleLogin() {
+        UserManager userManager = UserManager.getInstance();
+
+        // Check if the user list is empty
+        if (userManager.getAllUsers().isEmpty()) {
+            handleFirstAdminCreation();  // Create the first admin user
+            return;
+        }
+
+        String username = usernameField.getText().trim();
+        String password = passwordField.getText().trim();
+
+        User user = userManager.authenticate(username, password);
+
+        if (user != null) {
+            SessionManager.getInstance().setCurrentUser(user);
+
+            if (user.isResetRequired()) {
+                // Redirect to SetNewPasswordPage
+                SetNewPasswordPage setNewPasswordPage = new SetNewPasswordPage(user);
+                Scene scene = new Scene(setNewPasswordPage.getView(), 400, 300);
+                Main.getStage().setScene(scene);
+            } else if (user.isFirstLogin()) {
+                Main.showAccountSetupPage(user);
+            } else if (user.getRoles().size() > 1) {
+                Main.showRoleSelectionPage(user);
+            } else {
+                Main.showHomePage(user, user.getRoles().get(0));
+            }
+        } else {
+            // Check if the user exists and if the OTP was used or expired
+        	User existingUser = userManager.getUserByUsername(username);
+            if (existingUser != null && existingUser.isResetRequired()) {
+                // Determine if the OTP is expired
+                LocalDateTime now = LocalDateTime.now();
+                if (existingUser.getOtpExpiration() != null && now.isAfter(existingUser.getOtpExpiration())) {
+                    String formattedExpiry = existingUser.getOtpExpiration().format(DISPLAY_FORMATTER);
+                    messageLabel.setText("One-time password has expired at " + formattedExpiry + ". Please contact an administrator.");
+                } else {
+                    messageLabel.setText("Invalid one-time password.");
+                }
+            } else {
+                messageLabel.setText("Invalid username or password.");
+            }
+        }
+    }
+
+    private void handleInvitationCode() {
+        String code = invitationCodeField.getText().trim();
+        UserManager userManager = UserManager.getInstance();
+        InvitationCode invitation = userManager.getInvitationCode(code);
+
+        if (invitation != null && !invitation.isUsed()) {
+            // Proceed to account creation
+            CreateUserPage createUserPage = new CreateUserPage(invitation);
+            Scene scene = new Scene(createUserPage.getView(), 400, 400);
+            Main.getStage().setScene(scene);
+        } else {
+            messageLabel.setText("Invalid or used invitation code.");
+        }
+    }
+
  // Additional method for creating the first admin user
     private void handleFirstAdminCreation() {
         String username = usernameField.getText().trim();
@@ -90,51 +158,4 @@ public class LoginPage {
             messageLabel.setText("Passwords do not match. Try again.");
         }
     }
-
-    private void handleLogin() {
-        UserManager userManager = UserManager.getInstance();
-
-        // Check if the user list is empty
-        if (userManager.getAllUsers().isEmpty()) {
-            handleFirstAdminCreation();  // Create the first admin user
-            return;
-        }
-
-        String username = usernameField.getText().trim();
-        String password = passwordField.getText().trim();
-
-        User user = userManager.authenticate(username, password);
-
-        if (user != null) {
-            SessionManager.getInstance().setCurrentUser(user);
-
-            if (user.isFirstLogin()) {
-                Main.showAccountSetupPage(user);
-            } else if (user.getRoles().size() > 1) {
-                Main.showRoleSelectionPage(user);
-            } else {
-                Main.showHomePage(user, user.getRoles().get(0));
-            }
-        } else {
-            messageLabel.setText("Invalid username or password.");
-        }
-    }
-
-
-    private void handleInvitationCode() {
-        String code = invitationCodeField.getText().trim();
-        UserManager userManager = UserManager.getInstance();
-        InvitationCode invitation = userManager.getInvitationCode(code);
-
-        if (invitation != null && !invitation.isUsed()) {
-            // Proceed to account creation
-            CreateUserPage createUserPage = new CreateUserPage(invitation);
-            Scene scene = new Scene(createUserPage.getView(), 400, 400);
-            Main.getStage().setScene(scene);
-        } else {
-            messageLabel.setText("Invalid or used invitation code.");
-        }
-    }
-    
-    
 }

@@ -1,10 +1,13 @@
 package Controllers;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
-import models.*;
-import Utilities.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import models.*;
+import Utilities.*;
+import javafx.concurrent.Task;
 
 public class CreateUserPage {
 
@@ -82,6 +85,28 @@ public class CreateUserPage {
         invitation.setUsed(true);
         userManager.removeInvitationCode(invitation.getCode());
 
-        messageLabel.setText("Account created successfully. Please log in.");
+        messageLabel.setText("Account created successfully. Redirecting to login...");
+
+        // Disable the create button to prevent multiple submissions
+        createButton.setDisable(true);
+
+        // Create a background task to wait for a short period before redirecting
+        Task<Void> redirectTask = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                // Wait for 3 seconds
+                Thread.sleep(3000);
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                // Redirect to login page on the JavaFX Application Thread
+                Platform.runLater(() -> Main.showLoginPage());
+            }
+        };
+
+        // Start the background task
+        new Thread(redirectTask).start();
     }
 }

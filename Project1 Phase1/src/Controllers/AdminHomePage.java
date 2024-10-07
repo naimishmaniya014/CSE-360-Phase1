@@ -6,8 +6,8 @@ import Utilities.*;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import java.time.format.DateTimeFormatter;
 
 import java.util.*;
 
@@ -23,6 +23,8 @@ public class AdminHomePage {
     private Button manageRolesButton;
     private Button logoutButton;
     private TextArea outputArea;
+    
+    private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("MMMM d, yyyy h:mm a");
 
     public AdminHomePage(User user) {
         this.user = user;
@@ -48,7 +50,10 @@ public class AdminHomePage {
         manageRolesButton.setOnAction(e -> handleManageRoles());
 
         logoutButton = new Button("Log Out");
-        logoutButton.setOnAction(e -> Main.showLoginPage());
+        logoutButton.setOnAction(e -> {
+            SessionManager.getInstance().clearSession();
+            Main.showLoginPage();
+        });
 
         outputArea = new TextArea();
         outputArea.setEditable(false);
@@ -62,7 +67,7 @@ public class AdminHomePage {
     }
 
     private void handleInviteUser() {
-        // Implementation for inviting user
+        // Existing implementation
         InviteUserDialog dialog = new InviteUserDialog();
         Optional<InvitationCode> result = dialog.showAndWait();
 
@@ -75,7 +80,7 @@ public class AdminHomePage {
 
     private void handleResetUser() {
         // Implementation for resetting user password
-        ResetUserDialog dialog = new ResetUserDialog();
+    	ResetUserDialog dialog = new ResetUserDialog();
         Optional<String> result = dialog.showAndWait();
 
         result.ifPresent(username -> {
@@ -83,9 +88,10 @@ public class AdminHomePage {
             User targetUser = userManager.getUserByUsername(username);
 
             if (targetUser != null) {
-                targetUser.setResetRequired(true);
-                targetUser.setOneTimePassword(UUID.randomUUID().toString().substring(0, 8));
+                userManager.resetPassword(username);
+                String formattedExpiry = targetUser.getOtpExpiration().format(DISPLAY_FORMATTER);
                 outputArea.appendText("User " + username + " password reset. One-time password: " + targetUser.getOneTimePassword() + "\n");
+                outputArea.appendText("OTP expires at: " + formattedExpiry + "\n"); // Use formatted date
             } else {
                 outputArea.appendText("User not found.\n");
             }
@@ -93,7 +99,7 @@ public class AdminHomePage {
     }
 
     private void handleDeleteUser() {
-        // Implementation for deleting user
+        // Existing implementation
         DeleteUserDialog dialog = new DeleteUserDialog();
         Optional<String> result = dialog.showAndWait();
 
@@ -116,7 +122,7 @@ public class AdminHomePage {
     }
 
     private void handleListUsers() {
-        // Implementation for listing users
+        // Existing implementation
         UserManager userManager = UserManager.getInstance();
         Collection<User> users = userManager.getAllUsers();
 
@@ -127,7 +133,7 @@ public class AdminHomePage {
     }
 
     private void handleManageRoles() {
-        // Implementation for managing user roles
+        // Existing implementation
         ManageRolesDialog dialog = new ManageRolesDialog();
         dialog.showAndWait();
     }
