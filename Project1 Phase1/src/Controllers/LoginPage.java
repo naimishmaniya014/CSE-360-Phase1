@@ -16,6 +16,17 @@ import javafx.scene.layout.VBox;
 
 public class LoginPage {
 
+	 /**
+     * <p> Title: Login Page Controller. </p>
+     * 
+     * <p> Description: This class manages the login page where users can log in with their credentials
+     * or use an invitation code to create a new account. </p>
+     * 
+     * @author Naimish
+     * 
+     * @version 1.00   2024-10-09  Initial version.
+     */
+	
     private GridPane view;
     private TextField usernameField;
     private PasswordField passwordField;
@@ -26,6 +37,10 @@ public class LoginPage {
     
     private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("MMMM d, yyyy h:mm a");
 
+    /**
+     * Constructor that initializes the login page interface, including input fields for
+     * username, password, and invitation codes, along with action buttons.
+     */
     public LoginPage() {
         view = new GridPane();
         view.setPadding(new Insets(20));
@@ -61,18 +76,26 @@ public class LoginPage {
         view.add(messageLabel, 0, 6, 2, 1);
     }
 
+    /**
+     * Returns the view (a GridPane layout) for the login page.
+     * 
+     * @return The GridPane layout of the login page.
+     */
     public GridPane getView() {
         return view;
     }
-
-    // Existing methods...
-
+    
+    /**
+     * Handles the login functionality. If the user list is empty, it triggers the creation
+     * of the first admin user. Otherwise, it validates the entered username and password 
+     * and proceeds to the next page based on the user's login status and roles.
+     */
     private void handleLogin() {
         UserManager userManager = UserManager.getInstance();
 
         // Check if the user list is empty
         if (userManager.getAllUsers().isEmpty()) {
-            handleFirstAdminCreation();  // Create the first admin user
+            handleFirstAdminCreation();
             return;
         }
 
@@ -85,7 +108,6 @@ public class LoginPage {
             SessionManager.getInstance().setCurrentUser(user);
 
             if (user.isResetRequired()) {
-                // Redirect to SetNewPasswordPage
                 SetNewPasswordPage setNewPasswordPage = new SetNewPasswordPage(user);
                 Scene scene = new Scene(setNewPasswordPage.getView(), 400, 300);
                 Main.getStage().setScene(scene);
@@ -114,13 +136,16 @@ public class LoginPage {
         }
     }
 
+    /**
+     * Handles the use of an invitation code to create a new account. If the invitation
+     * code is valid and unused, it proceeds to the account creation page.
+     */
     private void handleInvitationCode() {
         String code = invitationCodeField.getText().trim();
         UserManager userManager = UserManager.getInstance();
         InvitationCode invitation = userManager.getInvitationCode(code);
 
         if (invitation != null && !invitation.isUsed()) {
-            // Proceed to account creation
             CreateUserPage createUserPage = new CreateUserPage(invitation);
             Scene scene = new Scene(createUserPage.getView(), 400, 400);
             Main.getStage().setScene(scene);
@@ -129,7 +154,10 @@ public class LoginPage {
         }
     }
 
- // Additional method for creating the first admin user
+    /**
+     * Handles the creation of the first admin user when the user list is empty.
+     * Prompts the admin to confirm the password and adds the user with admin role.
+     */
     private void handleFirstAdminCreation() {
         String username = usernameField.getText().trim();
         String password = passwordField.getText().trim();
@@ -138,18 +166,15 @@ public class LoginPage {
             messageLabel.setText("Username and password cannot be empty.");
             return;
         }
-
-        // Prompt for password confirmation
         Dialog<String> dialog = new TextInputDialog();
         dialog.setTitle("Confirm Password");
         dialog.setHeaderText("Enter the password again for confirmation:");
         Optional<String> result = dialog.showAndWait();
 
         if (result.isPresent() && result.get().equals(password)) {
-            // Create the first admin user
             UserManager userManager = UserManager.getInstance();
             User adminUser = new User(username, password);
-            adminUser.addRole(Role.ADMIN);  // Set role as Admin
+            adminUser.addRole(Role.ADMIN); 
             userManager.addUser(adminUser);
 
             // Direct to the login page again

@@ -10,6 +10,19 @@ import Utilities.UserManager;
 
 public class SetNewPasswordPage {
 
+    /**
+     * <p> Title: Set New Password Page Controller. </p>
+     * 
+     * <p> Description: This class handles the page where a user can set a new password after
+     * password reset or upon first login. It validates the new password fields and updates
+     * the user's password in the system. After successfully setting the password, the user
+     * is redirected to the login page. </p>
+     * 
+     * @author Naimish
+     * 
+     * @version 1.00   2024-10-09  Initial version.
+     */
+
     private GridPane view;
     private PasswordField newPasswordField;
     private PasswordField confirmNewPasswordField;
@@ -17,6 +30,12 @@ public class SetNewPasswordPage {
     private Label messageLabel;
     private User user;
 
+    /**
+     * Constructor that initializes the set new password page.
+     * The user is passed to this page, allowing them to set a new password.
+     * 
+     * @param user The user setting the new password.
+     */
     public SetNewPasswordPage(User user) {
         this.user = user;
 
@@ -44,10 +63,21 @@ public class SetNewPasswordPage {
         view.add(messageLabel, 0, 3, 2, 1);
     }
 
+    /**
+     * Returns the view for the set new password page, which is a GridPane layout.
+     * 
+     * @return The GridPane layout of the set new password page.
+     */
     public GridPane getView() {
         return view;
     }
 
+    /**
+     * Handles the logic when the "Set Password" button is clicked. It validates the
+     * new password fields, checks if both passwords match, updates the user's password,
+     * and resets the user's one-time password (OTP). After successfully updating the password,
+     * it redirects the user to the login page.
+     */
     private void handleSetPassword() {
         String newPassword = newPasswordField.getText().trim();
         String confirmNewPassword = confirmNewPasswordField.getText().trim();
@@ -62,10 +92,8 @@ public class SetNewPasswordPage {
             return;
         }
 
-        // Update the user's password
         user.setPassword(newPassword);
 
-        // Invalidate the OTP and reset flags
         UserManager.getInstance().invalidateOtp(user);
 
         messageLabel.setText("Password updated successfully. Redirecting to login...");
@@ -84,12 +112,9 @@ public class SetNewPasswordPage {
 
             @Override
             protected void succeeded() {
-                // Redirect to login page on the JavaFX Application Thread
                 Platform.runLater(() -> Main.showLoginPage());
             }
         };
-
-        // Start the background task
         new Thread(redirectTask).start();
     }
 }

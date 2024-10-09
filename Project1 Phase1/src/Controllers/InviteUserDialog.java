@@ -12,8 +12,24 @@ import java.util.UUID;
 
 public class InviteUserDialog extends Dialog<InvitationCode> {
 
+	/**
+     * <p> Title: Invite User Dialog. </p>
+     * 
+     * <p> Description: This class creates a dialog that allows an admin to generate an invitation code for a new user.
+     * The dialog prompts the admin to input roles (comma-separated) and generates an invitation code 
+     * that includes those roles. </p>
+     * 
+     * @author Naimish
+     * 
+     * @version 1.00   2024-10-09  Initial version.
+     */
+	
     private TextField rolesField;
 
+    /**
+     * Constructor that initializes the invite user dialog.
+     * The admin inputs the roles and generates an invitation code for a new user.
+     */
     public InviteUserDialog() {
         setTitle("Invite User");
         setHeaderText("Generate an invitation code for a new user.");
@@ -30,6 +46,12 @@ public class InviteUserDialog extends Dialog<InvitationCode> {
 
         getDialogPane().setContent(grid);
 
+        /**
+         * Sets the result converter for the dialog to return an InvitationCode
+         * object when the "Generate" button is clicked, or null if canceled.
+         * 
+         * @return An InvitationCode object containing the generated code and the roles, or null if canceled.
+         */
         setResultConverter(dialogButton -> {
             if (dialogButton == generateButtonType) {
                 String rolesInput = rolesField.getText().trim();

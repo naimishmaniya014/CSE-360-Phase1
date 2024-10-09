@@ -13,6 +13,17 @@ import java.util.*;
 
 public class AdminHomePage {
 
+    /**
+     * <p> Title: Admin Home Page Controller. </p>
+     * 
+     * <p> Description: This class manages the Admin Home Page functionalities
+     * such as inviting users, resetting passwords, and managing roles. </p>
+     * 
+     * @author Naimish
+     * 
+     * @version 1.00   2024-10-09  Initial version.
+     */
+
     private VBox view;
     private User user;
     private Label welcomeLabel;
@@ -26,6 +37,11 @@ public class AdminHomePage {
     
     private static final DateTimeFormatter DISPLAY_FORMATTER = DateTimeFormatter.ofPattern("MMMM d, yyyy h:mm a");
 
+    /**
+     * Constructor that sets up the admin home page elements and their actions.
+     * 
+     * @param user The admin user logged in.
+     */
     public AdminHomePage(User user) {
         this.user = user;
 
@@ -62,12 +78,19 @@ public class AdminHomePage {
                 listUsersButton, manageRolesButton, logoutButton, outputArea);
     }
 
+    /**
+     * Returns the view for this page, which is a VBox layout.
+     * 
+     * @return The VBox layout of the admin home page.
+     */
     public VBox getView() {
         return view;
     }
 
+    /**
+     * Handles inviting a new user and displaying the generated invitation code.
+     */
     private void handleInviteUser() {
-        // Existing implementation
         InviteUserDialog dialog = new InviteUserDialog();
         Optional<InvitationCode> result = dialog.showAndWait();
 
@@ -78,8 +101,13 @@ public class AdminHomePage {
         });
     }
 
+    /**
+     * Handles resetting a user's password. It opens a dialog where the admin can input the username.
+     * If the user is found, their password is reset, and a one-time password (OTP) is generated.
+     * The OTP expiration time is displayed in the output area.
+     * If the user is not found, an appropriate message is displayed.
+     */
     private void handleResetUser() {
-        // Implementation for resetting user password
     	ResetUserDialog dialog = new ResetUserDialog();
         Optional<String> result = dialog.showAndWait();
 
@@ -97,9 +125,12 @@ public class AdminHomePage {
             }
         });
     }
-
+    
+    /**
+     * Handles the deletion of a user account by showing a dialog to input the username,
+     * then confirms with the admin before proceeding with the deletion.
+     */
     private void handleDeleteUser() {
-        // Existing implementation
         DeleteUserDialog dialog = new DeleteUserDialog();
         Optional<String> result = dialog.showAndWait();
 
@@ -121,8 +152,11 @@ public class AdminHomePage {
         });
     }
 
+    /**
+     * Lists all users present in the system by fetching them from the UserManager and 
+     * displaying their usernames, names, and roles in the output area.
+     */
     private void handleListUsers() {
-        // Existing implementation
         UserManager userManager = UserManager.getInstance();
         Collection<User> users = userManager.getAllUsers();
 
@@ -132,8 +166,11 @@ public class AdminHomePage {
         }
     }
 
+    /**
+     * Opens a dialog for managing roles of users in the system, allowing the admin
+     * to assign or modify roles.
+     */
     private void handleManageRoles() {
-        // Existing implementation
         ManageRolesDialog dialog = new ManageRolesDialog();
         dialog.showAndWait();
     }

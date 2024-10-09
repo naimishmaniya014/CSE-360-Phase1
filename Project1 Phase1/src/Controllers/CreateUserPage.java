@@ -11,6 +11,19 @@ import javafx.concurrent.Task;
 
 public class CreateUserPage {
 
+    /**
+     * <p> Title: Create User Page Controller. </p>
+     * 
+     * <p> Description: This class manages the user account creation page. It validates the user's
+     * input, such as username and password, and handles the creation of a new user account
+     * using an invitation code. The page also handles redirecting the user to the login
+     * page after account creation. </p>
+     * 
+     * @author Naimish
+     * 
+     * @version 1.00   2024-10-09  Initial version.
+     */
+
     private GridPane view;
     private TextField usernameField;
     private PasswordField passwordField;
@@ -19,6 +32,12 @@ public class CreateUserPage {
     private Label messageLabel;
     private InvitationCode invitation;
 
+    /**
+     * Constructor that initializes the create user page.
+     * The invitation code is passed to assign roles to the newly created user.
+     * 
+     * @param invitation The invitation code used to create a new user with predefined roles.
+     */
     public CreateUserPage(InvitationCode invitation) {
         this.invitation = invitation;
 
@@ -51,10 +70,20 @@ public class CreateUserPage {
         view.add(messageLabel, 0, 4, 2, 1);
     }
 
+    /**
+     * Returns the view for the create user page, which is a GridPane layout.
+     * 
+     * @return The GridPane layout of the create user page.
+     */
     public GridPane getView() {
         return view;
     }
 
+    /**
+     * Handles the account creation process. Validates the input fields, checks if the username
+     * is already taken, and ensures the passwords match. After successfully creating the account,
+     * the system redirects the user to the login page after a brief delay.
+     */
     private void handleCreateAccount() {
         String username = usernameField.getText().trim();
         String password = passwordField.getText().trim();
@@ -101,12 +130,9 @@ public class CreateUserPage {
 
             @Override
             protected void succeeded() {
-                // Redirect to login page on the JavaFX Application Thread
                 Platform.runLater(() -> Main.showLoginPage());
             }
         };
-
-        // Start the background task
         new Thread(redirectTask).start();
     }
 }
